@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Clock Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+  transition: background-color 0.4s ease, color 0.3s ease;
+}
+
+/* THEME VARIABLES */
+:root {
+  --bg-light: linear-gradient(135deg, #e8f0f7, #ffffff);
+  --bg-dark: linear-gradient(135deg, #1a1c2b, #2a2d3e);
+
+  --card-light: rgba(255, 255, 255, 0.7);
+  --card-dark: rgba(40, 40, 55, 0.75);
+
+  --text-light: #1c1f24;
+  --text-dark: #f2f2f2;
+
+  --accent: #0078ff;
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --shadow-dark: rgba(0, 0, 0, 0.5);
+}
+
+body {
+  background: var(--bg-light);
+  color: var(--text-light);
+  min-height: 100vh;
+  padding: 20px;
+}
+body.dark-mode {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 25px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 14px var(--shadow-light);
+  position: relative;
+}
+body.dark-mode header {
+  background: rgba(30, 30, 45, 0.6);
+  box-shadow: 0 6px 14px var(--shadow-dark);
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.subtitle {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-top: 6px;
+}
+
+/* THEME TOGGLE */
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.toggle-switch {
+  appearance: none;
+  width: 50px;
+  height: 26px;
+  background: #aaa;
+  border-radius: 50px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.toggle-switch:checked {
+  background: var(--accent);
+}
+.toggle-switch::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 3px;
+  left: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+.toggle-switch:checked::after {
+  transform: translateX(24px);
+}
+
+/* CLOCK CARDS GRID */
+.clocks-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+/* CLOCK CARD */
+.clock-card {
+  background: var(--card-light);
+  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 6px 12px var(--shadow-light);
+  transition: transform 0.25s ease, box-shadow 0.3s ease, background 0.5s ease;
+}
+body.dark-mode .clock-card {
+  background: var(--card-dark);
+  box-shadow: 0 6px 12px var(--shadow-dark);
+}
+.clock-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.city-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+.time {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin: 10px 0;
+}
+.date {
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+.time-period {
+  margin-top: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: rgba(0, 120, 255, 0.1);
+  color: var(--accent);
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: inline-block;
+}
+.time-icon {
+  font-size: 2rem;
+  margin: 10px 0;
+  color: var(--accent);
+}
+
+/* --- Flag Gradient Hover Effects --- */
+.clock-card[data-city="Pune, India"]:hover {
+  background: linear-gradient(135deg, #FF9933, #FFFFFF, #138808);
+  color: #fff;
+}
+
+.clock-card[data-city="Singapore, Singapore"]:hover {
+  background: linear-gradient(135deg, #ED2939 , #FFFFFF );
+  color: #fff;
+}
+
+.clock-card[data-city="Manila, Philippines"]:hover {
+  background: linear-gradient(135deg, #0038A8 , #FFFFFF , #CE1126 );
+  color: #000;
+}
+
+.clock-card[data-city="Los Angeles, CA, USA"]:hover,
+.clock-card[data-city="Atlanta, GA, USA"]:hover {
+  background: repeating-linear-gradient(
+    135deg,
+    #B22234 ,
+    #FFFFFF 
+  );
+  color: #fff;
+}
+
+.clock-card[data-city="Cali, Colombia"]:hover {
+  background: linear-gradient(135deg, #FFD700 , #0033A0 , #CE1126 );
+  color: #fff;
+}
+
+.clock-card[data-city="London, UK"]:hover {
+  background: linear-gradient(135deg, #00247D, #FFFFFF, #CF142B);
+  color: #fff;
+}
+
+/* Make text/icons readable on hover */
+.clock-card[data-city]:hover .city-name,
+.clock-card[data-city]:hover .time,
+.clock-card[data-city]:hover .date,
+.clock-card[data-city]:hover .time-period,
+.clock-card[data-city]:hover .time-icon {
+  color: #000000 !important;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  margin-top: 40px;
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 14px var(--shadow-light);
+  font-size: 0.9rem;
+}
+body.dark-mode footer {
+  background: rgba(30, 30, 45, 0.6);
+  box-shadow: 0 6px 14px var(--shadow-dark);
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2rem;
+  }
+  .time {
+    font-size: 1.6rem;
+  }
+}
+  </style>
+</head>
+<body class="light-mode">
+  <div class="container">
+    <header>
+      <h1>World Clock Dashboard</h1>
+      <p class="subtitle">Current times around the world</p>
+      <div class="theme-toggle">
+        <span class="toggle-text">Light</span>
+        <label>
+          <input type="checkbox" id="theme-toggle" class="toggle-switch">
+        </label>
+        <span class="toggle-text">Dark</span>
+      </div>
+    </header>
+
+    <div class="clocks-container" id="clocksContainer"></div>
+
+    <footer>
+      <p>World Clock Dashboard &copy; 2023 | All times update in real-time</p>
+    </footer>
+  </div>
+
+  <script>
+const cities = [
+  { name: "Pune, India", timezone: "Asia/Kolkata" },
+  { name: "Singapore, Singapore", timezone: "Asia/Singapore" },
+  { name: "Manila, Philippines", timezone: "Asia/Manila" },
+  { name: "Los Angeles, CA, USA", timezone: "America/Los_Angeles" },
+  { name: "Cali, Colombia", timezone: "America/Bogota" },
+  { name: "Atlanta, GA, USA", timezone: "America/New_York" },
+  { name: "London, UK", timezone: "Europe/London" }
+];
+
+const themeToggle = document.getElementById('theme-toggle');
+const body = document.body;
+
+const savedTheme = localStorage.getItem('theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+  body.classList.add('dark-mode');
+  themeToggle.checked = true;
+}
+
+themeToggle.addEventListener('change', function() {
+  if (this.checked) {
+    body.classList.add('dark-mode');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    body.classList.remove('dark-mode');
+    localStorage.setItem('theme', 'light');
+  }
+});
+
+function generateClockCards() {
+  const clocksContainer = document.getElementById('clocksContainer');
+  cities.forEach(city => {
+    const clockCard = document.createElement('div');
+    clockCard.className = 'clock-card';
+    clockCard.id = `card-${city.timezone}`;
+    clockCard.setAttribute("data-city", city.name); // 👈 for CSS targeting
+    clockCard.innerHTML = `
+      <div class="city-name">${city.name}</div>
+      <div class="time-icon" id="icon-${city.timezone}">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="time" id="time-${city.timezone}">Loading...</div>
+      <div class="date" id="date-${city.timezone}"></div>
+      <div class="time-period" id="period-${city.timezone}"></div>
+    `;
+    clocksContainer.appendChild(clockCard);
+  });
+}
+
+function updateCityTime(city) {
+  try {
+    const options = {
+      timeZone: city.timezone,
+      hour12: true,
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric'
+    };
+
+    const dateOptions = {
+      timeZone: city.timezone,
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', options);
+    const dateStr = now.toLocaleDateString('en-US', dateOptions);
+
+    const hour = now.toLocaleTimeString('en-US', {
+      timeZone: city.timezone,
+      hour12: false,
+      hour: 'numeric'
+    });
+
+    const hourNum = parseInt(hour);
+    let timeOfDay = '';
+    let icon = '';
+    if (hourNum >= 5 && hourNum < 12) {
+      timeOfDay = 'Morning';
+      icon = '<i class="fas fa-sun"></i>';
+    } else if (hourNum >= 12 && hourNum < 17) {
+      timeOfDay = 'Afternoon';
+      icon = '<i class="fas fa-sun"></i>';
+    } else if (hourNum >= 17 && hourNum < 21) {
+      timeOfDay = 'Evening';
+      icon = '<i class="fas fa-moon"></i>';
+    } else {
+      timeOfDay = 'Night';
+      icon = '<i class="fas fa-moon"></i>';
+    }
+
+    document.getElementById(`time-${city.timezone}`).textContent = timeStr;
+    document.getElementById(`date-${city.timezone}`).textContent = dateStr;
+    document.getElementById(`period-${city.timezone}`).textContent = timeOfDay;
+    document.getElementById(`icon-${city.timezone}`).innerHTML = icon;
+  } catch (error) {
+    console.error(`Error updating time for ${city.name}:`, error);
+    document.getElementById(`time-${city.timezone}`).textContent = "Error loading time";
+  }
+}
+
+function updateAllClocks() {
+  cities.forEach(city => updateCityTime(city));
+}
+
+function init() {
+  generateClockCards();
+  updateAllClocks();
+  setInterval(updateAllClocks, 1000);
+}
+document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
